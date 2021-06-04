@@ -24,11 +24,13 @@ func NewTaskWebService(cfg *config.Config, repo *repository.Repository) *TaskWeb
 // CreateTask creates a new task
 func (s *TaskWebService) CreateTask(task *model.DBTask) (model.DBTask, error) {
 
+	// create task
 	if err := s.repo.Repo.CreateTask(task); err != nil {
 		log.Printf("service CreateTask: %v", err)
 		return model.DBTask{}, err
 	}
 
+	// get new task
 	newTask, err := s.repo.Repo.GetTask(task.Name)
 	if err != nil {
 		log.Printf("service GetTask: %v", err)
@@ -38,7 +40,7 @@ func (s *TaskWebService) CreateTask(task *model.DBTask) (model.DBTask, error) {
 	return newTask, nil
 }
 
-// GetTask creates a new task
+// GetTask gets a task with name
 func (s *TaskWebService) GetTask(name string) (model.DBTask, error) {
 
 	task, err := s.repo.Repo.GetTask(name)

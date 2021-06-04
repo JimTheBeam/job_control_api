@@ -10,6 +10,10 @@ type TaskRepository interface {
 	CreateTask(*model.DBTask) error
 	GetTask(string) (model.DBTask, error)
 	DeleteTask(string) error
+
+	CreateSubTask(*model.DBSubTask) error
+	GetSubTask(string) (model.DBSubTask, error)
+	DeleteSubTask(string) error
 }
 
 // Repository ...

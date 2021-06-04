@@ -95,12 +95,27 @@ func run() error {
 	// successful response json: {"name": "string", "description": "string"}
 	taskRoute.POST("/", hand.CreateTask)
 
-	// Create a new task.
+	// Delete a task.
 	// Method - POST
 	// Parameter content type application/json
 	// request json: {"name": "string", "description": "string"}
 	// successful response json: {"name": "string", "description": "string"} TODO:
 	taskRoute.POST("/delete", hand.DeleteTask)
+
+	subTaskRoute := v1.Group("/subtask")
+	// set routes
+	// Create a new subtask.
+	// Method - POST
+	// Parameter content type application/json
+	// request json: {"name": "string", "description": "string"}TODO:
+	// successful response json: {"name": "string", "description": "string"}
+	subTaskRoute.POST("/", hand.CreateSubTask)
+	// Delete a task.
+	// Method - POST
+	// Parameter content type application/json
+	// request json: {"name": "string", "description": "string"}TODO:
+	// successful response json: {"name": "string", "description": "string"} TODO:
+	subTaskRoute.POST("/delete", hand.DeleteSubTask)
 
 	// Start server
 	s := &http.Server{
