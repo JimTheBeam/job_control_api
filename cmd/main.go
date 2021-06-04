@@ -91,10 +91,16 @@ func run() error {
 	// Create a new task.
 	// Method - POST
 	// Parameter content type application/json
-	// TODO:
-	// request json: {"name": "string"}
-	// successful response json: {"name": "string"}
+	// request json: {"name": "string", "description": "string"}
+	// successful response json: {"name": "string", "description": "string"}
 	taskRoute.POST("/", hand.CreateTask)
+
+	// Create a new task.
+	// Method - POST
+	// Parameter content type application/json
+	// request json: {"name": "string", "description": "string"}
+	// successful response json: {"name": "string", "description": "string"} TODO:
+	taskRoute.POST("/delete", hand.DeleteTask)
 
 	// Start server
 	s := &http.Server{

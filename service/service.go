@@ -8,7 +8,9 @@ import (
 
 // TaskService ...
 type TaskService interface {
-	CreateTask(*model.DBTask) error
+	CreateTask(*model.DBTask) (model.DBTask, error)
+	GetTask(string) (model.DBTask, error)
+	DeleteTask(*model.DBTask) error
 }
 
 // Service ...
