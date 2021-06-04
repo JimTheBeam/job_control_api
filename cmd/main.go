@@ -117,6 +117,12 @@ func run() error {
 	// successful response json: {"name": "string", "description": "string"} TODO:
 	subTaskRoute.POST("/delete", hand.DeleteSubTask)
 
+	cost := v1.Group("/cost")
+
+	cost.POST("/", hand.CreateCost)
+
+	cost.POST("/delete", hand.DeleteCost)
+
 	// Start server
 	s := &http.Server{
 		Addr:         cfg.Server.Addr,

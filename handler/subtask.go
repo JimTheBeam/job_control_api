@@ -10,6 +10,7 @@ import (
 
 // CreateSubTask creates a new subTask
 func (h *TaskHandler) CreateSubTask(ctx echo.Context) error {
+	log.Printf("CreateSubTask handler starts")
 	var subTask model.DBSubTask
 
 	if err := ctx.Bind(&subTask); err != nil {

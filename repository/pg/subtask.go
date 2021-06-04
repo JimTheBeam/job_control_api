@@ -32,7 +32,7 @@ func (r *TaskPG) GetSubTask(name string) (model.DBSubTask, error) {
 
 	err := r.db.QueryRow(sql, name).Scan(&subTask.Name, &subTask.Description, &subTask.TaskName)
 	if err != nil {
-		log.Printf("DB: GetTask: %v", err)
+		log.Printf("DB: GetSubTask: %v", err)
 		return model.DBSubTask{}, err
 	}
 
@@ -48,7 +48,7 @@ func (r *TaskPG) DeleteSubTask(name string) error {
 
 	_, err := r.db.Exec(sql, name)
 	if err != nil {
-		log.Printf("DB: DeleteTask: %v", err)
+		log.Printf("DB: DeleteSubTask: %v", err)
 		return err
 	}
 

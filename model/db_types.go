@@ -16,8 +16,7 @@ type DBSubTask struct {
 
 // DBCost is a database sub-task cost
 type DBCost struct {
-	Cost        string `json:"cost" validate:"required"`
-	Description string `json:"description" validate:"required"`
+	Cost string `json:"costs" validate:"required"`
 
 	SubTaskName string `json:"subtask_name" validate:"required"`
 }

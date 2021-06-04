@@ -24,8 +24,7 @@ CREATE TABLE sub_tasks
 CREATE TABLE costs
 (
     id            serial       not null unique,
-    name          varchar(255) not null unique,
-    description   text         not null,
+    costs         varchar(255) not null,
     subtask_name  varchar(255) not null,
     CONSTRAINT "pk_cost_id" PRIMARY KEY (id)   
 );
