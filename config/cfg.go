@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -35,30 +35,30 @@ type DBConfig struct {
 }
 
 // LoadCfg - open config file and put config to cfg.Config struct
-func LoadConfig(path string, cfg *Config) error {
-	log.Printf("Loading config")
-	defer log.Printf("Config loaded")
+func LoadConfig(path string, cfg *Config, log *logrus.Logger) error {
+	log.Debug("Loading config")
+	defer log.Debug("Config loaded")
 
-	log.Printf("Config file: %s", path)
+	log.Debug("Config file: %s", path)
 	cfgData, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Printf("Unable to read config file: %v", err)
+		log.Errorf("Unable to read config file: %v", err)
 		return err
 	}
 
 	err = yaml.Unmarshal(cfgData, &cfg)
 	if err != nil {
-		log.Printf("Unable to unmarshal config data: %v", err)
+		log.Errorf("Unable to unmarshal config data: %v", err)
 		return err
 	}
 
 	// print config
 	configBytes, err := json.MarshalIndent(cfg, "", "  ")
 	if err != nil {
-		log.Fatal(err)
+		log.Warn(err)
 	}
 	fmt.Println("Configuration:", string(configBytes))
-	log.Println("Configuration:", string(configBytes))
+	log.Debug("Configuration:", string(configBytes))
 
 	return nil
 }

@@ -9,9 +9,11 @@ import (
 // InitLogger initialize logrus logger
 func InitLogger(log *logrus.Logger, lvl string) {
 	log.SetFormatter(&logrus.TextFormatter{
-		ForceColors:     true,
-		TimestampFormat: "2006-01-02 15:04:05",
-		FullTimestamp:   true,
+		// ForceColors: true,
+		DisableColors:          true,
+		TimestampFormat:        "2006-01-02 15:04:05",
+		FullTimestamp:          true,
+		DisableLevelTruncation: true,
 	})
 
 	log.SetOutput(os.Stdout)

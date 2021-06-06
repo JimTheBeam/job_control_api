@@ -16,6 +16,7 @@ import (
 	"os"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
 )
 
@@ -42,77 +43,79 @@ func run() error {
 
 	// ctx := context.Background()
 
-	// TODO: change this
+	// init logger
+	log := logrus.New()
+	logger.InitLogger(log, *logLvl)
 
-	logg := logrus.New()
-	logger.InitLogger(logg, *logLvl)
-
-	logg.Info("app is starting...")
+	log.Info("app is starting...")
 
 	// TODO: переделать на флаг
 	cfgFile := "./config/config.yaml"
 
 	// load config
-	if err := config.LoadConfig(cfgFile, &cfg); err != nil {
-		logg.Errorf("Config file unmarshal error: %s", err)
+	if err := config.LoadConfig(cfgFile, &cfg, log); err != nil {
+		log.Errorf("Config file unmarshal error: %s", err)
 		os.Exit(exitCode)
 	}
-	logg.Info("config loaded")
+	log.Info("config loaded")
 
 	// exit code 2
 	exitCode++
 
 	// open log file
 	if cfg.LogFile != "" {
-		logg.Infof("Log file is: %s", cfg.LogFile)
+		log.Infof("Log file is: %s", cfg.LogFile)
 		lf, err := os.OpenFile(cfg.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0660)
 		if err != nil {
-			logg.Fatalf("Error opening logfile: %s", err)
+			log.Fatalf("Error opening logfile: %s", err)
 			os.Exit(exitCode)
 		}
 		defer lf.Close()
-		logg.SetOutput(lf)
+		log.SetOutput(lf)
 	}
-	logg.Info("log file opened")
+	log.Info("log file opened")
 
 	// exit code 3
 	exitCode++
 
 	// Connect to database
-	db, err := pg.NewPostgresDB(&cfg)
+	db, err := pg.NewPostgresDB(&cfg, log)
 	if err != nil {
-		logg.Fatalf("failed to initialize db: %s", err.Error())
+		log.Fatalf("failed to initialize db: %s", err.Error())
 		os.Exit(exitCode)
 	}
-	logg.Info("connected to database")
+	log.Info("connected to database")
 
 	// exit code 4
 	exitCode++
 
 	// Init db repository
-	repo := repository.NewRepository(db)
-	logg.Info("initialized database repository")
+	repo := repository.NewRepository(db, log)
+	log.Info("initialized database repository")
 
 	// init service
-	serv := service.NewService(repo, &cfg)
+	serv := service.NewService(repo, &cfg, log)
 
 	// init handlers
-	hand := handler.NewTask(serv, &cfg)
+	hand := handler.NewTask(serv, &cfg, log)
 
 	// TODO:
 	// init cash
 	err = cash.Init(repo)
 	if err != nil {
-		logg.Fatal("init cash: %v", err)
+		log.Fatal("init cash: %v", err)
 		os.Exit(exitCode)
 	}
-	logg.Error("initialized cash")
+	log.Info("initialized cash")
 
 	// Initialize Echo instance
 	e := echo.New()
 	e.Validator = validator.NewValidator()
 
 	e.HTTPErrorHandler = apiErr.Error
+
+	// init middleware
+	e.Use(middleware.Logger())
 
 	// API v1
 	v1 := e.Group("/v1")

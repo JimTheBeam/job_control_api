@@ -4,6 +4,8 @@ import (
 	"job_control_api/config"
 	"job_control_api/model"
 	"job_control_api/repository"
+
+	"github.com/sirupsen/logrus"
 )
 
 // TaskService ...
@@ -27,8 +29,8 @@ type Service struct {
 }
 
 // NewService creates a new service
-func NewService(repo *repository.Repository, cfg *config.Config) *Service {
+func NewService(repo *repository.Repository, cfg *config.Config, log *logrus.Logger) *Service {
 	return &Service{
-		Task: NewTaskWebService(cfg, repo),
+		Task: NewTaskWebService(cfg, repo, log),
 	}
 }

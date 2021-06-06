@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"job_control_api/model"
 	"job_control_api/repository/pg"
+
+	"github.com/sirupsen/logrus"
 )
 
 type TaskRepository interface {
@@ -29,8 +31,8 @@ type Repository struct {
 }
 
 // NewRepository ...
-func NewRepository(db *sql.DB) *Repository {
+func NewRepository(db *sql.DB, log *logrus.Logger) *Repository {
 	return &Repository{
-		Repo: pg.NewTaskPG(db),
+		Repo: pg.NewTaskPG(db, log),
 	}
 }

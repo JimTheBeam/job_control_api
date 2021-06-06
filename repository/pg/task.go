@@ -4,30 +4,34 @@ import (
 	"database/sql"
 	"fmt"
 	"job_control_api/model"
-	"log"
+
+	"github.com/sirupsen/logrus"
 )
 
 // TaskPG is a postgres task
 type TaskPG struct {
-	db *sql.DB
+	db  *sql.DB
+	log *logrus.Logger
 }
 
 // NewTaskPG new task
-func NewTaskPG(db *sql.DB) *TaskPG {
+func NewTaskPG(db *sql.DB, log *logrus.Logger) *TaskPG {
 	return &TaskPG{
-		db: db,
+		db:  db,
+		log: log,
 	}
 }
 
 // CreateTask creates a new task
 func (r *TaskPG) CreateTask(task *model.DBTask) error {
-	log.Printf("DB: CreateTask start")
-	defer log.Printf("DB: CreateTask end")
+	log := r.log
+	log.Debug("DB: CreateTask start")
+	defer log.Debug("DB: CreateTask end")
 
 	sql := fmt.Sprintf("INSERT INTO tasks (name, description) VALUES ($1, $2)")
 
 	if err := r.db.QueryRow(sql, task.Name, task.Description).Err(); err != nil {
-		log.Printf("DB: CreateTask query: %v", err)
+		log.Errorf("DB: CreateTask query: %v", err)
 		return err
 	}
 
@@ -36,8 +40,9 @@ func (r *TaskPG) CreateTask(task *model.DBTask) error {
 
 // GetTask gets task
 func (r *TaskPG) GetTask(name string) (model.DBTask, error) {
-	log.Printf("DB: GetTask start")
-	defer log.Printf("DB: GetTask end")
+	log := r.log
+	log.Debug("DB: GetTask start")
+	defer log.Debug("DB: GetTask end")
 
 	var task model.DBTask
 
@@ -45,7 +50,7 @@ func (r *TaskPG) GetTask(name string) (model.DBTask, error) {
 
 	err := r.db.QueryRow(sql, name).Scan(&task.Name, &task.Description)
 	if err != nil {
-		log.Printf("DB: GetTask: %v", err)
+		log.Warn("DB: GetTask: %v", err)
 		return model.DBTask{}, err
 	}
 
@@ -54,30 +59,32 @@ func (r *TaskPG) GetTask(name string) (model.DBTask, error) {
 
 // DeleteTask deletes task with name
 func (r *TaskPG) DeleteTask(name string) error {
-	log.Printf("DB: DeleteTask start")
-	defer log.Printf("DB: DeleteTask end")
+	log := r.log
+	log.Debug("DB: DeleteTask start")
+	defer log.Debug("DB: DeleteTask end")
 
 	sql := fmt.Sprintf("DELETE FROM tasks WHERE name=$1")
 
 	_, err := r.db.Exec(sql, name)
 	if err != nil {
-		log.Printf("DB: DeleteTask: %v", err)
+		log.Errorf("DB: DeleteTask: %v", err)
 		return err
 	}
 
-	log.Printf("DB: Task with name=%s deleted", name)
+	log.Debugf("DB: Task with name=%s deleted", name)
 
 	return nil
 }
 
 // GetAllTasks gets all tasks for Cash
 func (r *TaskPG) GetAllTasks(cash *model.Data) error {
-	log.Printf("DB: GetAllTasks start")
-	defer log.Printf("DB: GetAllTasks end")
+	log := r.log
+	log.Debug("DB: GetAllTasks start")
+	defer log.Debug("DB: GetAllTasks end")
 
 	rows, err := r.db.Query("SELECT name, description FROM tasks ORDER BY name")
 	if err != nil {
-		log.Printf("DB: Get all tasks: %v", err)
+		log.Errorf("DB: Get all tasks query: %v", err)
 		return err
 	}
 	defer rows.Close()
@@ -85,12 +92,14 @@ func (r *TaskPG) GetAllTasks(cash *model.Data) error {
 	for rows.Next() {
 		task := model.Task{}
 		if err := rows.Scan(&task.Name, &task.Description); err != nil {
+			log.Errorf("DB:GetAllTasks scan row: %v", err)
 			return err
 		}
 		// add task to cash
 		cash.Task[task.Name] = task
 	}
 	if err := rows.Err(); err != nil {
+		log.Errorf("DB:GetAllTasks rows err: %v", err)
 		return err
 	}
 
