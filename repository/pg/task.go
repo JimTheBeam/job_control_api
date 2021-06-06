@@ -69,3 +69,30 @@ func (r *TaskPG) DeleteTask(name string) error {
 
 	return nil
 }
+
+// GetAllTasks gets all tasks for Cash
+func (r *TaskPG) GetAllTasks(cash *model.Data) error {
+	log.Printf("DB: GetAllTasks start")
+	defer log.Printf("DB: GetAllTasks end")
+
+	rows, err := r.db.Query("SELECT name, description FROM tasks ORDER BY name")
+	if err != nil {
+		log.Printf("DB: Get all tasks: %v", err)
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		task := model.Task{}
+		if err := rows.Scan(&task.Name, &task.Description); err != nil {
+			return err
+		}
+		// add task to cash
+		cash.Task[task.Name] = task
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}

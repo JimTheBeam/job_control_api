@@ -56,3 +56,30 @@ func (r *TaskPG) DeleteSubTask(name string) error {
 
 	return nil
 }
+
+// GetAllSubTasks gets all subtasks for Cash
+func (r *TaskPG) GetAllSubTasks(cash *model.Data) error {
+	log.Printf("DB: GetAllSubTasks start")
+	defer log.Printf("DB: GetAllSubTasks end")
+
+	rows, err := r.db.Query("SELECT name, description, task_name FROM sub_tasks ORDER BY name")
+	if err != nil {
+		log.Printf("DB: Get all subtasks: %v", err)
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		subTask := model.SubTask{}
+		if err := rows.Scan(&subTask.Name, &subTask.Description, &subTask.TaskName); err != nil {
+			return err
+		}
+		// add subtask to cash
+		cash.SubTask[subTask.Name] = subTask
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}

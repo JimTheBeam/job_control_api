@@ -56,3 +56,30 @@ func (r *TaskPG) DeleteCost(subTaskName string) error {
 
 	return nil
 }
+
+// GetAllCost gets all costs for Cash
+func (r *TaskPG) GetAllCost(cash *model.Data) error {
+	log.Printf("DB: GetAllCost start")
+	defer log.Printf("DB: GetAllCost end")
+
+	rows, err := r.db.Query("SELECT costs, subtask_name FROM costs")
+	if err != nil {
+		log.Printf("DB: Get all costs: %v", err)
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		cost := model.SubTaskCost{}
+		if err := rows.Scan(&cost.Costs, &cost.SubTaskName); err != nil {
+			return err
+		}
+		// add cost to cash
+		cash.Cost[cost.SubTaskName] = cost
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}

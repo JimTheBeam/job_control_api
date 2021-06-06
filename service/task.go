@@ -62,3 +62,8 @@ func (s *TaskWebService) DeleteTask(task *model.DBTask) error {
 
 	return nil
 }
+
+
+func(s *TaskWebService) GetAllTasks(){
+	
+}

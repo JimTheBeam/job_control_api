@@ -7,38 +7,64 @@ type Data struct {
 	Task    map[string]Task
 	SubTask map[string]SubTask
 	Cost    map[string]SubTaskCost
-
-	Trees map[string]TreeRoot // why? maybe map[string]Task is enough
 }
 
-// Task represents a task
-type Task struct {
-	Name string
+type NewData struct {
+	Task map[string]NTask
+}
+
+type NTask struct {
+	Name        string
+	Description string
 
 	AverageCost time.Duration
 	TotalCost   time.Duration
 
-	SubTask []*SubTask
+	SubTasks map[string]NSubTask
 }
 
-// SubTask represents a sub-task
+type NSubTask struct {
+	Name        string
+	Description string
+	TaskName    string
+
+	AverageCost time.Duration
+	TotalCost   time.Duration
+
+	PSubTaskCost []*SubTaskCost
+}
+
+type NCost struct {
+	SubTaskName string
+	Costs       time.Duration
+}
+
+// Task represents a task
+type Task struct {
+	Name        string
+	Description string
+
+	AverageCost time.Duration
+	TotalCost   time.Duration
+
+	PSubTasks []*SubTask
+}
+
+// SubTask represents a subtask
 type SubTask struct {
-	Task *Task
+	PTask *Task
 
-	Name string
+	Name        string
+	Description string
+	TaskName    string
 
-	SubTaskCost []*SubTaskCost
+	PSubTaskCost *SubTaskCost
 }
 
-// SubTaskCost represents time cost for a sub-task
+// SubTaskCost represents time cost for a subtask
 type SubTaskCost struct {
-	SubTask *SubTask
+	PSubTask *SubTask
 
-	Name  string
-	Costs time.Duration
-}
-
-// TreeRoot represents root for a tree Task-SubTask-SubTaskCost
-type TreeRoot struct {
-	Task *Task
+	SubTaskName string
+	Costs       time.Duration
 }

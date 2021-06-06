@@ -12,8 +12,9 @@ import (
 
 // Config is a config
 type Config struct {
-	Server ServerConfig `yaml:"server_config"`
-	DB     DBConfig     `yaml:"database_config"`
+	Server  ServerConfig `yaml:"server_config"`
+	DB      DBConfig     `yaml:"database_config"`
+	LogFile string       `yaml:"log_path"`
 }
 
 // ServerConfig is a config for a server
