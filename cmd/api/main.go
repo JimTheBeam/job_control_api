@@ -171,6 +171,12 @@ func run() error {
 	// request with query param: name="cost name"
 	// successful response json: {"status": 200, "error_name": "OK", "message": "cost deleted"}
 	cost.DELETE("/delete", hand.DeleteCost)
+	// Update a cost.
+	// Method - PUT
+	// Parameter content type application/json
+	// request json: {"name": "string", "costs": "string", "subtask_name":"string"}TODO:
+	// successful response json: {"name": "string", "costs": "string", "subtask_name":"string"}TODO:
+	cost.PUT("/", hand.UpdateCost)
 
 	// Start server
 	s := &http.Server{

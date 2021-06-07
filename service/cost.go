@@ -79,3 +79,40 @@ func (s *TaskWebService) DeleteCost(cost *model.DBCost) error {
 
 	return nil
 }
+
+// UpdateCost update a cost with name
+func (s *TaskWebService) UpdateCost(cost *model.DBCost) (model.DBCost, error) {
+	log := s.log
+	log.Debug("UpdateCost service starts")
+	defer log.Debug("UpdateCost service end")
+
+	log.Debugf("service UpdateCost updating '%v'", cost)
+
+	// check if cost exists
+	if _, err := s.repo.Repo.GetCost(cost.Name); err != nil {
+		log.Warningf("service UpdateCost get cost: %v", err)
+		return model.DBCost{}, errors.New("cost doesnot exist")
+	}
+
+	// check if subtask exists
+	if _, err := s.repo.Repo.GetSubTask(cost.SubTaskName); err != nil {
+		log.Warningf("service UpdateCost get subtask: %v", err)
+		return model.DBCost{}, errors.New("subtask doesnot exist")
+	}
+
+	// update cost
+	if err := s.repo.Repo.UpdateCost(cost); err != nil {
+		log.Errorf("service UpdateCost update cost: %v", err)
+		return model.DBCost{}, errors.New("couldnot update cost")
+	}
+
+	// get cost
+	updatedCost, err := s.repo.Repo.GetCost(cost.Name)
+	if err != nil {
+		log.Errorf("service UpdateCost get cost: %v", err)
+		return model.DBCost{}, errors.New("couldnot update cost")
+	}
+
+	return updatedCost, nil
+
+}

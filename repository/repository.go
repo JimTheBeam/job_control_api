@@ -23,6 +23,7 @@ type TaskRepository interface {
 	CreateCost(*model.DBCost) error
 	GetCost(string) (model.DBCost, error)
 	DeleteCost(string) error
+	UpdateCost(*model.DBCost) error
 	GetAllCost(*model.Data) error
 }
 

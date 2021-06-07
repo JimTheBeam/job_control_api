@@ -21,6 +21,7 @@ type TaskService interface {
 
 	CreateCost(*model.DBCost) (model.DBCost, error)
 	GetCost(string) (model.DBCost, error)
+	UpdateCost(*model.DBCost) (model.DBCost, error)
 	DeleteCost(*model.DBCost) error
 }
 

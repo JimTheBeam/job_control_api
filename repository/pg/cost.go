@@ -63,6 +63,26 @@ func (r *TaskPG) DeleteCost(costName string) error {
 	return nil
 }
 
+// TODO:
+// UpdateCost update cost with name
+func (r *TaskPG) UpdateCost(cost *model.DBCost) error {
+	log := r.log
+	log.Debug("DB: UpdateCost start")
+	defer log.Debug("DB: UpdateCost end")
+
+	log.Debugf("DB: UpdateCost update cost='%s'", cost)
+
+	sql := fmt.Sprintf("UPDATE costs SET name=$1, costs=$2, subtask_name=$3 WHERE name=$4")
+
+	_, err := r.db.Exec(sql, cost.Name, cost.Cost, cost.SubTaskName, cost.Name)
+	if err != nil {
+		log.Errorf("DB: Update query: %v", err)
+		return err
+	}
+
+	return nil
+}
+
 // GetAllCost gets all costs for Cash
 func (r *TaskPG) GetAllCost(cash *model.Data) error {
 	log := r.log

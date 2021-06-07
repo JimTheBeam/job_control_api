@@ -14,7 +14,7 @@ func (s *TaskWebService) CreateSubTask(subTask *model.DBSubTask) (model.DBSubTas
 	// check if task exists
 	_, err := s.repo.Repo.GetTask(subTask.TaskName)
 	if err != nil {
-		log.Warnf("service CreateSubTask get task: %v", err)
+		log.Warningf("service CreateSubTask get task: %v", err)
 		return model.DBSubTask{}, err
 	}
 
@@ -43,7 +43,7 @@ func (s *TaskWebService) GetSubTask(name string) (model.DBSubTask, error) {
 
 	subTask, err := s.repo.Repo.GetSubTask(name)
 	if err != nil {
-		log.Warnf("service GetTask: %v", err)
+		log.Warningf("service GetTask: %v", err)
 		return model.DBSubTask{}, err
 	}
 	return subTask, nil
@@ -93,14 +93,14 @@ func (s *TaskWebService) UpdateSubTask(subTask *model.DBSubTask) (model.DBSubTas
 
 	// update subtask
 	if err := s.repo.Repo.UpdateSubTask(subTask); err != nil {
-		log.Warningf("UpdateSubTask service UpdateSubTask: %v", err)
+		log.Errorf("UpdateSubTask service UpdateSubTask: %v", err)
 		return model.DBSubTask{}, errors.New("couldnot update subtask")
 	}
 
 	// get new subtask
 	newSubTask, err := s.repo.Repo.GetSubTask(subTask.Name)
 	if err != nil {
-		log.Warningf("UpdateSubTask service getSubTask: %v", err)
+		log.Errorf("UpdateSubTask service getSubTask: %v", err)
 		return model.DBSubTask{}, errors.New("couldnot update subtask")
 	}
 

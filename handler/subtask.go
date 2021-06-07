@@ -98,6 +98,7 @@ func (h *TaskHandler) UpdateSubTask(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, "bad incoming json")
 	}
 	log.Debugf("UpdateSubTask handler update subtask=%v", subTask)
+
 	// update subtask
 	newSubtask, err := h.service.Task.UpdateSubTask(&subTask)
 	if err != nil {
