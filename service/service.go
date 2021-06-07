@@ -17,6 +17,7 @@ type TaskService interface {
 	CreateSubTask(*model.DBSubTask) (model.DBSubTask, error)
 	GetSubTask(string) (model.DBSubTask, error)
 	DeleteSubTask(*model.DBSubTask) error
+	UpdateSubTask(*model.DBSubTask) (model.DBSubTask, error)
 
 	CreateCost(*model.DBCost) (model.DBCost, error)
 	GetCost(string) (model.DBCost, error)

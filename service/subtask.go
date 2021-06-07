@@ -70,3 +70,41 @@ func (s *TaskWebService) DeleteSubTask(subTask *model.DBSubTask) error {
 
 	return nil
 }
+
+// UpdateSubTask updates a subtask with name
+func (s *TaskWebService) UpdateSubTask(subTask *model.DBSubTask) (model.DBSubTask, error) {
+	log := s.log
+	log.Debug("UpdateSubTask service starts")
+	defer log.Debug("UpdateSubTask service end")
+
+	log.Debugf("UpdateSubTask service update subtask=%v", subTask)
+
+	// check if subtask exists
+	if _, err := s.repo.Repo.GetSubTask(subTask.Name); err != nil {
+		log.Warningf("UpdateSubTask service getSubTask: %v", err)
+		return model.DBSubTask{}, errors.New("subtask doesnot exist")
+	}
+
+	// check if task for subtask exists
+	if _, err := s.repo.Repo.GetTask(subTask.TaskName); err != nil {
+		log.Warningf("UpdateSubTask service getTask: %v", err)
+		return model.DBSubTask{}, errors.New("task doesnot exist")
+	}
+
+	// update subtask
+	if err := s.repo.Repo.UpdateSubTask(subTask); err != nil {
+		log.Warningf("UpdateSubTask service UpdateSubTask: %v", err)
+		return model.DBSubTask{}, errors.New("couldnot update subtask")
+	}
+
+	// get new subtask
+	newSubTask, err := s.repo.Repo.GetSubTask(subTask.Name)
+	if err != nil {
+		log.Warningf("UpdateSubTask service getSubTask: %v", err)
+		return model.DBSubTask{}, errors.New("couldnot update subtask")
+	}
+
+	// return subtask
+	return newSubTask, nil
+
+}

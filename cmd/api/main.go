@@ -148,6 +148,12 @@ func run() error {
 	// request with query param: name="subtask name"
 	// successful response json: {"status": 200, "error_name": "OK", "message": "subtask deleted"}
 	subTaskRoute.DELETE("/delete", hand.DeleteSubTask)
+	// Update a subtask.
+	// Method - PUT
+	// Parameter content type application/json
+	// request json: {"name": "string", "description": "string", "task_name":"string"}TODO:
+	// successful response json: {"name": "string", "description": "string", "task_name":"string"}TODO:
+	subTaskRoute.PUT("/", hand.UpdateSubTask)
 
 	cost := v1.Group("/cost")
 

@@ -26,6 +26,7 @@ func (h *TaskHandler) CreateTask(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, "bad incoming json")
 	}
 
+	// TODO: to service!!!!
 	// check if task with "name" already exist
 	_, err := h.service.Task.GetTask(task.Name)
 	if err == nil {

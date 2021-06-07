@@ -59,6 +59,25 @@ func (r *TaskPG) DeleteSubTask(name string) error {
 	return nil
 }
 
+// UpdateSubTask update subtask with name
+func (r *TaskPG) UpdateSubTask(subTask *model.DBSubTask) error {
+	log := r.log
+	log.Debug("DB: UpdateSubTask start")
+	defer log.Debug("DB: UpdateSubTask end")
+
+	log.Debugf("DB:UpdateSubTask subtask=%v", subTask)
+
+	sql := fmt.Sprintf("UPDATE sub_tasks SET name=$1, description=$2, task_name=$3 WHERE name=$4")
+
+	_, err := r.db.Exec(sql, subTask.Name, subTask.Description, subTask.TaskName, subTask.Name)
+	if err != nil {
+		log.Errorf("DB: Update query: %v", err)
+		return err
+	}
+
+	return nil
+}
+
 // GetAllSubTasks gets all subtasks for Cash
 func (r *TaskPG) GetAllSubTasks(cash *model.Data) error {
 	log := r.log
