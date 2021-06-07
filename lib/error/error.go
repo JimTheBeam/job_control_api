@@ -2,7 +2,6 @@ package error
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -29,7 +28,6 @@ func Error(err error, ctx echo.Context) {
 	if ok {
 		errObj.Code = he.Code
 		errObj.Message = fmt.Sprintf("%v", he.Message)
-		log.Printf("HTTP error code: %d message: %v", he.Code, he.Message)
 	}
 
 	errObj.Name = http.StatusText(errObj.Code)

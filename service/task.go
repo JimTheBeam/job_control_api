@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"job_control_api/config"
 	"job_control_api/model"
 	"job_control_api/repository"
@@ -27,6 +28,9 @@ func NewTaskWebService(cfg *config.Config, repo *repository.Repository, log *log
 // CreateTask creates a new task
 func (s *TaskWebService) CreateTask(task *model.DBTask) (model.DBTask, error) {
 	log := s.log
+	log.Debug("CreateTask service starts")
+	defer log.Debug("CreateTask service end")
+
 	// create task
 	if err := s.repo.Repo.CreateTask(task); err != nil {
 		log.Errorf("service CreateTask: %v", err)
@@ -45,10 +49,13 @@ func (s *TaskWebService) CreateTask(task *model.DBTask) (model.DBTask, error) {
 
 // GetTask gets a task with name
 func (s *TaskWebService) GetTask(name string) (model.DBTask, error) {
+	log := s.log
+	log.Debug("GetTask service starts")
+	defer log.Debug("GetTask service end")
 
 	task, err := s.repo.Repo.GetTask(name)
 	if err != nil {
-		s.log.Errorf("service GetTask: %v", err)
+		log.Errorf("service GetTask: %v", err)
 		return model.DBTask{}, err
 	}
 	return task, nil
@@ -56,11 +63,21 @@ func (s *TaskWebService) GetTask(name string) (model.DBTask, error) {
 
 // DeleteTask deletes a task with name
 func (s *TaskWebService) DeleteTask(task *model.DBTask) error {
+	log := s.log
+	log.Debug("DeleteTask service starts")
+	defer log.Debug("DeleteTask service end")
 
-	err := s.repo.Repo.DeleteTask(task.Name)
+	// check if task exists
+	_, err := s.repo.Repo.GetTask(task.Name)
 	if err != nil {
-		s.log.Errorf("servise DeleteTask: %v", err)
-		return err
+		log.Warningf("service DeleteTask task doesnt exist: %v", err)
+		return errors.New("task doesnot exist")
+	}
+	// delete task from db
+	err = s.repo.Repo.DeleteTask(task.Name)
+	if err != nil {
+		log.Errorf("service DeleteTask: %v", err)
+		return errors.New("couldnot delete the task")
 	}
 
 	return nil

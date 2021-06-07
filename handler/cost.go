@@ -13,7 +13,6 @@ func (h *TaskHandler) CreateCost(ctx echo.Context) error {
 	log.Debug("CreateCost handler starts")
 	defer log.Debug("CreateCost handler starts")
 
-	// TODO:
 	var cost model.DBCost
 
 	if err := ctx.Bind(&cost); err != nil {
@@ -27,18 +26,19 @@ func (h *TaskHandler) CreateCost(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, "bad incoming json")
 	}
 
-	// check if cost with "subtask name" already exist
-	_, err := h.service.Task.GetCost(cost.SubTaskName)
-	if err == nil {
-		log.Errorf("CreateCost Cost already exist: %v", err)
-		return echo.NewHTTPError(http.StatusForbidden, "cost already exists")
-	}
-
-	// create subtask
+	// create cost
 	createdCost, err := h.service.Task.CreateCost(&cost)
 	if err != nil {
 		log.Errorf("CreateCost handler Error: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "couldnot create cost")
+
+		switch err.Error() {
+		case "cost already exists":
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		case "subtask doesnot exist":
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		case "couldnot create cost":
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
 	}
 
 	log.Debugf("Cost created: %v", createdCost)
@@ -46,38 +46,34 @@ func (h *TaskHandler) CreateCost(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, createdCost)
 }
 
-// DeleteSubTask deletes a subTask
+// DeleteSubTask deletes a cost with name
 func (h *TaskHandler) DeleteCost(ctx echo.Context) error {
 	log := h.log
 	log.Debug("DeleteCost handler starts")
 	defer log.Debug("DeleteCost handler end")
 
-	// TODO:
 	var cost model.DBCost
 
-	if err := ctx.Bind(&cost); err != nil {
-		log.Errorf("Bind json Error: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, "bad incoming json")
+	name := ctx.QueryParam("name")
+	log.Debugf("DeleteCost handler: deleting=%s", name)
+	// check if param name exists
+	if name == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "param name is missing")
 	}
 
-	// validate cost
-	if err := ctx.Validate(&cost); err != nil {
-		log.Errorf("Validate json Error: %v", err)
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, "bad incoming json")
-	}
-
-	// check if cost with "subtask name" exists
-	_, err := h.service.Task.GetSubTask(cost.SubTaskName)
-	if err != nil {
-		log.Errorf("DeleteCost subtask doesnot exist: %v", err)
-		return echo.NewHTTPError(http.StatusForbidden, "subtask doesnot exist")
-	}
+	cost.Name = name
 
 	// delete cost
-	err = h.service.Task.DeleteCost(&cost)
+	err := h.service.Task.DeleteCost(&cost)
 	if err != nil {
-		log.Errorf("DeleteCost couldnot delete cost: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "couldnot delete cost")
+		log.Warningf("DeleteSubTask handler couldnot delete task: %v", err)
+
+		switch err.Error() {
+		case "cost doesnot exist":
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		case "couldnot delete cost":
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
 	}
 
 	log.Debugf("Cost deleted: %v", cost)

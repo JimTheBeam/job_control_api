@@ -36,8 +36,8 @@ type DBConfig struct {
 
 // LoadCfg - open config file and put config to cfg.Config struct
 func LoadConfig(path string, cfg *Config, log *logrus.Logger) error {
-	log.Debug("Loading config")
-	defer log.Debug("Config loaded")
+	log.Info("Loading config")
+	defer log.Info("Config loaded")
 
 	log.Debug("Config file: %s", path)
 	cfgData, err := ioutil.ReadFile(path)
@@ -58,7 +58,6 @@ func LoadConfig(path string, cfg *Config, log *logrus.Logger) error {
 		log.Warn(err)
 	}
 	fmt.Println("Configuration:", string(configBytes))
-	log.Debug("Configuration:", string(configBytes))
 
 	return nil
 }

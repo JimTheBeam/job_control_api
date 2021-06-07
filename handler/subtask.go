@@ -12,6 +12,7 @@ func (h *TaskHandler) CreateSubTask(ctx echo.Context) error {
 	log := h.log
 	log.Debug("CreateSubTask handler starts")
 	defer log.Debug("CreateSubTask handler end")
+
 	var subTask model.DBSubTask
 
 	if err := ctx.Bind(&subTask); err != nil {
@@ -52,32 +53,28 @@ func (h *TaskHandler) DeleteSubTask(ctx echo.Context) error {
 
 	var subTask model.DBSubTask
 
-	if err := ctx.Bind(&subTask); err != nil {
-		log.Warnf("Bind json Error: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, "bad incoming json")
-	}
+	name := ctx.QueryParam("name")
 
-	// validate subtask
-	if err := ctx.Validate(&subTask); err != nil {
-		log.Warnf("Validate json Error: %v", err)
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, "bad incoming json")
+	// check if param name exists
+	if name == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "param name is missing")
 	}
-
-	// check if subtask with "name" exists
-	_, err := h.service.Task.GetSubTask(subTask.Name)
-	if err != nil {
-		log.Warnf("DeleteSubTask subtask doesnot exist: %v", err)
-		return echo.NewHTTPError(http.StatusForbidden, "subtask doesnot exist")
-	}
+	subTask.Name = name
 
 	// delete subtask
-	err = h.service.Task.DeleteSubTask(&subTask)
+	err := h.service.Task.DeleteSubTask(&subTask)
 	if err != nil {
-		log.Errorf("DeleteSubTask couldnot delete task: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "couldnot delete subtask")
+		log.Warningf("DeleteSubTask handler couldnot delete task: %v", err)
+
+		switch err.Error() {
+		case "subtask doesnot exist":
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		case "couldnot delete the subtask":
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
 	}
 
-	log.Debugf("SubTask deleted: %v", subTask)
+	log.Debugf("SubTask deleted: %v", subTask.Name)
 
 	return echo.NewHTTPError(http.StatusOK, "subtask deleted")
 }

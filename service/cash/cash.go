@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"job_control_api/model"
 	"job_control_api/repository"
-	"log"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Init initialize cash
-func Init(r *repository.Repository) error {
+func Init(r *repository.Repository, log *logrus.Logger) error {
 	taskMap := make(map[string]model.Task)
 	subTaskMap := make(map[string]model.SubTask)
 	costMap := make(map[string]model.SubTaskCost)
@@ -18,14 +19,15 @@ func Init(r *repository.Repository) error {
 		Cost:    costMap,
 	}
 
-	fmt.Println(Cash)
+	log.Info(Cash)
 
 	// load cash from database
 	err := loadFromDB(&Cash, r)
 	if err != nil {
-		log.Printf("load cash: %v", err)
+		log.Errorf("load cash: %v", err)
 		return err
 	}
+	log.Debug("cach loaded from db")
 
 	// fill relations
 	createRelations(&Cash)
@@ -45,21 +47,21 @@ func loadFromDB(cash *model.Data, r *repository.Repository) error {
 	// load tasks
 	err := r.Repo.GetAllTasks(cash)
 	if err != nil {
-		log.Printf("could not load task to cash")
+		logrus.Errorf("could not load task to cash")
 		return err
 	}
 
 	// load subtasks
 	err = r.Repo.GetAllSubTasks(cash)
 	if err != nil {
-		log.Printf("could not load subtask to cash")
+		logrus.Errorf("could not load subtask to cash")
 		return err
 	}
 
 	// load costs
 	err = r.Repo.GetAllCost(cash)
 	if err != nil {
-		log.Printf("could not load costs to cash")
+		logrus.Errorf("could not load costs to cash")
 		return err
 	}
 

@@ -57,7 +57,6 @@ func run() error {
 		log.Errorf("Config file unmarshal error: %s", err)
 		os.Exit(exitCode)
 	}
-	log.Info("config loaded")
 
 	// exit code 2
 	exitCode++
@@ -74,6 +73,7 @@ func run() error {
 		log.SetOutput(lf)
 	}
 	log.Info("log file opened")
+	log.Warningln("config:", cfg)
 
 	// exit code 3
 	exitCode++
@@ -101,7 +101,7 @@ func run() error {
 
 	// TODO:
 	// init cash
-	err = cash.Init(repo)
+	err = cash.Init(repo, log)
 	if err != nil {
 		log.Fatal("init cash: %v", err)
 		os.Exit(exitCode)
@@ -130,33 +130,41 @@ func run() error {
 	taskRoute.POST("/", hand.CreateTask)
 
 	// Delete a task.
-	// Method - POST TODO: change POST on Delete with query param "name"
-	// Parameter content type application/json
-	// request json: {"name": "string", "description": "string"}
-	// successful response json: {"name": "string", "description": "string"} TODO:
-	taskRoute.POST("/delete", hand.DeleteTask)
+	// Method - DELETE
+	// request with query param: name="task name"
+	// successful response json: {"status": 200, "error_name": "OK", "message": "task deleted"}
+	taskRoute.DELETE("/delete", hand.DeleteTask)
 
 	subTaskRoute := v1.Group("/subtask")
 	// set routes
 	// Create a new subtask.
 	// Method - POST
 	// Parameter content type application/json
-	// request json: {"name": "string", "description": "string"}TODO:
+	// request json: {"name": "string", "description": "string", "task_name":"string"}TODO:
 	// successful response json: {"name": "string", "description": "string"}
 	subTaskRoute.POST("/", hand.CreateSubTask)
-	// Delete a task.
-	// Method - POST TODO: change POST on Delete with query param "name"
-	// Parameter content type application/json
-	// request json: {"name": "string", "description": "string"}TODO:
-	// successful response json: {"name": "string", "description": "string"} TODO:
-	subTaskRoute.POST("/delete", hand.DeleteSubTask)
+	// Delete a subtask.
+	// Method - DELETE
+	// request with query param: name="subtask name"
+	// successful response json: {"status": 200, "error_name": "OK", "message": "subtask deleted"}
+	subTaskRoute.DELETE("/delete", hand.DeleteSubTask)
 
 	cost := v1.Group("/cost")
 
+	// set routes
+	// Create a new cost.
+	// Method - POST
+	// Parameter content type application/json
+	// request json: {"name": "string", "description": "string"} TODO:
+	// successful response json: {"name": "string", "cost": "string", "subtask_name": "string"}
 	cost.POST("/", hand.CreateCost)
 
 	// TODO: change POST on Delete with query param "name"
-	cost.POST("/delete", hand.DeleteCost)
+	// Delete a cost.
+	// Method - DELETE
+	// request with query param: name="cost name"
+	// successful response json: {"status": 200, "error_name": "OK", "message": "cost deleted"}
+	cost.DELETE("/delete", hand.DeleteCost)
 
 	// Start server
 	s := &http.Server{

@@ -16,20 +16,20 @@ func (h *TaskHandler) CreateTask(ctx echo.Context) error {
 	var task model.DBTask
 
 	if err := ctx.Bind(&task); err != nil {
-		log.Warnf("Bind json Error: %v", err)
+		log.Warningf("Bind json Error: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest, "bad incoming json")
 	}
 
 	// validate task
 	if err := ctx.Validate(&task); err != nil {
-		log.Warnf("Validate json Error: %v", err)
+		log.Warningf("Validate json Error: %v", err)
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, "bad incoming json")
 	}
 
 	// check if task with "name" already exist
 	_, err := h.service.Task.GetTask(task.Name)
 	if err == nil {
-		log.Warnf("CreateTask task already exist: %v", err)
+		log.Warningf("handler CreateTask task already exist: %v", err)
 		return echo.NewHTTPError(http.StatusForbidden, "task already exists")
 	}
 
@@ -39,7 +39,7 @@ func (h *TaskHandler) CreateTask(ctx echo.Context) error {
 		log.Errorf("CreateTask handler Error: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "couldnot create task")
 	}
-	log.Debugf("Task created: %v", createdTask)
+	log.Debugf("handler Task created: %v", createdTask)
 
 	return ctx.JSON(http.StatusCreated, createdTask)
 }
@@ -52,32 +52,28 @@ func (h *TaskHandler) DeleteTask(ctx echo.Context) error {
 
 	var task model.DBTask
 
-	if err := ctx.Bind(&task); err != nil {
-		log.Warnf("Bind json Error: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, "bad incoming json")
-	}
+	name := ctx.QueryParam("name")
 
-	// validate task
-	if err := ctx.Validate(&task); err != nil {
-		log.Warnf("Validate json Error: %v", err)
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, "bad incoming json")
+	// check if param name exists
+	if name == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "param name is missing")
 	}
-
-	// check if task with "name" exists
-	_, err := h.service.Task.GetTask(task.Name)
-	if err != nil {
-		log.Warnf("DeleteTask task doesnot exist: %v", err)
-		return echo.NewHTTPError(http.StatusForbidden, "task doesnot exist")
-	}
+	task.Name = name
 
 	// delete task
-	err = h.service.Task.DeleteTask(&task)
+	err := h.service.Task.DeleteTask(&task)
 	if err != nil {
-		log.Errorf("DeleteTask couldnot delete task: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "couldnot delete task")
+		log.Warningf("handler DeleteTask couldnot delete task: %v", err)
+
+		switch err.Error() {
+		case "task doesnot exist":
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		case "couldnot delete the task":
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
 	}
 
-	log.Debugf("Task deleted: %v", task)
+	log.Debugf("handler Task deleted: %s", task.Name)
 
 	return echo.NewHTTPError(http.StatusOK, "task deleted")
 }
